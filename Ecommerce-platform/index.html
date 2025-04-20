@@ -1,16 +1,23 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>简易电子商城</title>
-    <style>
-        body { font-family: Arial; max-width: 800px; margin: 0 auto; }
-    .product { 
-      border: 1px solid #eee; 
-      padding: 15px; 
+  <title>简易电子商城</title>
+  <style>
+    body {
+      font-family: Arial;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .product {
+      border: 1px solid #eee;
+      padding: 15px;
       margin: 20px;
       border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
+
     button {
       background: #007bff;
       color: white;
@@ -18,35 +25,109 @@
       padding: 8px 15px;
       border-radius: 4px;
       cursor: pointer;
-}
-        .product { border: 1px solid #ddd; padding: 10px; margin: 10px; }
-    </style>
+    }
+
+    .product {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin: 10px;
+    }
+  </style>
 </head>
+
 <body>
-    <h1>欢迎来到我的商城</h1>
-    <div class="product">
-        <h3>商品1：笔记本电脑</h3>
-        <p>价格：￥5000</p>
-        <button>加入购物车</button>
-    </div>
-    <div class="product">
-  <h3>商品2：无线耳机</h3>
-  <p>价格：￥299</p>
-  <button>加入购物车</button>
-</div>
-<div class="product">
-  <h3>商品3：智能手表</h3>
-  <p>价格：￥899</p>
-  <button>加入购物车</button>
-</div>
+  <h1>欢迎来到我的商城</h1>
+  <div class="product">
+    <h3>商品1:笔记本电脑</h3>
+    <p>价格:￥5000</p>
+    <button>加入购物车</button>
+  </div>
+  <div class="product">
+    <h3>商品2:无线耳机</h3>
+    <p>价格:￥299</p>
+    <button>加入购物车</button>
+  </div>
+  <div class="product">
+    <h3>商品3:智能手表</h3>
+    <p>价格:￥899</p>
+    <button>加入购物车</button>
+  </div>
+  <!-- 购物车面板 -->
+  <div class="cart">
+  <h2>购物车（<span id="cart-count">0</span>）</h2>
+  <ul id="cart-items"></ul>
+  </div>
 </body>
-    <script>
-        let cartCount = 0;
-        document.querySelectorAll('button').forEach(btn => {
-        btn.onclick = () => {
-        cartCount++;
-        alert(`已添加商品！当前购物车共有 ${cartCount} 件商品`);
+<script>
+  // ✅ 完全保留图片中的计数器初始化
+  let cartCount = parseInt(localStorage.getItem("cartCount")) || 0;
+  
+  // ✅ 新增购物车数据存储（兼容原计数器）
+  let cartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
+
+  // ✅ 保留图片中的按钮事件（仅修改内部逻辑）
+  document.querySelectorAll('button').forEach(btn => {
+    btn.onclick = () => {
+      // 模拟商品数据（实际应从按钮的data属性获取）
+      const newItem = {
+        id: Date.now(), // 用时间戳作为唯一ID
+        name: "示例商品",
+        price: 100
       };
-    });
-    </script>
+
+      cartItems.push(newItem);
+      cartCount = cartItems.length; // 保持计数器同步
+      
+      // ✅ 保留原alert提示风格
+      alert(`已添加商品！当前购物车共有 ${cartCount} 件商品`);
+      
+      // 新增：保存数据并更新界面
+      updateCart();
+    };
+  });
+
+  // 🔄 新增功能核心逻辑
+  function updateCart() {
+    // 1. 数据持久化（兼容原计数器）
+    localStorage.setItem("cartCount", cartCount);
+    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    
+    // 2. 计算总价
+    const totalPrice = cartItems.reduce((sum, item) => sum + item.price, 0);
+    
+    // 3. 渲染购物车面板（需在HTML中添加<div id="cart-panel"></div>）
+    const cartPanel = document.getElementById("cart-panel");
+    if (cartPanel) {
+      cartPanel.innerHTML = `
+        <h4>购物车详情（共 ${cartCount} 件）</h4>
+        <ul style="list-style:none; padding-left:0;">
+          ${cartItems.map(item => `
+            <li style="margin-bottom:8px;">
+              ${item.name} - ￥${item.price}
+              <button style="margin-left:10px; color:red; border:none; background:none;" 
+                      onclick="removeItem(${item.id})">
+                删除
+              </button>
+            </li>
+          `).join('')}
+        </ul>
+        <p><strong>总价：￥${totalPrice.toFixed(2)}</strong></p>
+      `;
+    }
+  }
+
+  // 🗑️ 新增删除功能（保持原交互风格）
+  function removeItem(id) {
+    cartItems = cartItems.filter(item => item.id !== id);
+    cartCount = cartItems.length; // 同步计数器
+    alert(`已删除商品！剩余 ${cartCount} 件`);
+    updateCart();
+  }
+
+  // 初始化渲染
+  updateCart();
+</script>
+
+<!-- ✅ 新增购物车展示区（不影响原页面结构） -->
+<div id="cart-panel" style="margin-top:20px; border-top:1px dashed #ccc; padding-top:15px;"></div>
 </html>
